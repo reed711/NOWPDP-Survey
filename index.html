@@ -1,0 +1,869 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Disability Awareness Survey — NOWPDP</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;800&family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+  var _supabaseUrl = 'YOUR_SUPABASE_URL';
+  var _supabaseKey = 'YOUR_SUPABASE_ANON_KEY';
+  var _sbClient = null;
+  function initSupabase() {
+    if (window.supabase && _supabaseUrl !== 'YOUR_SUPABASE_URL') {
+      _sbClient = window.supabase.createClient(_supabaseUrl, _supabaseKey);
+    }
+  }
+  document.addEventListener('DOMContentLoaded', initSupabase);
+</script>
+<style>
+:root {
+  --blue: #1a56db;
+  --blue-dark: #1045b8;
+  --blue-light: #eff4ff;
+  --orange: #f97316;
+  --orange-light: #fff7ed;
+  --ink: #0f172a;
+  --ink-mid: #334155;
+  --soft: #64748b;
+  --border: #e2e8f0;
+  --bg: #f8fafc;
+  --white: #ffffff;
+  --radius: 16px;
+}
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+body {
+  font-family: 'DM Sans', sans-serif;
+  background: var(--bg);
+  color: var(--ink);
+  min-height: 100vh;
+}
+
+/* HEADER */
+.site-header {
+  background: var(--ink);
+  padding: 0 40px;
+  height: 70px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+.header-logo { display: flex; align-items: center; gap: 14px; }
+.logo-mark {
+  width: 42px; height: 42px;
+  background: var(--blue);
+  border-radius: 12px;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+}
+.logo-mark svg { width: 22px; }
+.logo-name strong {
+  font-family: 'Playfair Display', serif;
+  font-size: 15px; font-weight: 700;
+  color: white; display: block; line-height: 1.2;
+}
+.logo-name span { font-size: 10px; color: rgba(255,255,255,.4); text-transform: uppercase; letter-spacing: .09em; }
+.lang-toggle {
+  display: flex; gap: 6px;
+}
+.lang-btn {
+  padding: 7px 18px;
+  border-radius: 100px;
+  font-size: 13px; font-weight: 600;
+  cursor: pointer; transition: .2s;
+  font-family: 'DM Sans', sans-serif;
+  border: 2px solid rgba(255,255,255,.2);
+  color: rgba(255,255,255,.6);
+  background: transparent;
+}
+.lang-btn.active {
+  background: var(--orange);
+  border-color: var(--orange);
+  color: white;
+}
+
+/* HERO */
+.hero {
+  background: linear-gradient(135deg, var(--ink) 0%, #1e3a5f 100%);
+  padding: 80px 40px;
+  text-align: center;
+  position: relative;
+  overflow: hidden;
+}
+.hero::before {
+  content: '';
+  position: absolute; inset: 0;
+  background:
+    radial-gradient(ellipse at 20% 50%, rgba(26,86,219,.35) 0%, transparent 60%),
+    radial-gradient(ellipse at 80% 30%, rgba(249,115,22,.2) 0%, transparent 55%);
+}
+.hero-badge {
+  display: inline-flex; align-items: center; gap: 8px;
+  background: rgba(249,115,22,.15);
+  border: 1px solid rgba(249,115,22,.3);
+  border-radius: 100px;
+  padding: 7px 18px;
+  font-size: 12px; font-weight: 600;
+  color: var(--orange);
+  margin-bottom: 28px;
+  position: relative; z-index: 1;
+  letter-spacing: .05em; text-transform: uppercase;
+}
+.hero h1 {
+  font-family: 'Playfair Display', serif;
+  font-size: clamp(2rem, 5vw, 3.4rem);
+  font-weight: 800; line-height: 1.15;
+  color: white; margin-bottom: 16px;
+  position: relative; z-index: 1;
+}
+.hero h1 em { color: var(--orange); font-style: normal; }
+.hero-sub {
+  font-size: 16px; font-weight: 300;
+  color: rgba(255,255,255,.65);
+  max-width: 560px; margin: 0 auto 14px;
+  line-height: 1.7;
+  position: relative; z-index: 1;
+}
+.hero-sub-ur {
+  font-size: 15px; font-weight: 300;
+  color: rgba(255,255,255,.5);
+  direction: rtl; text-align: center;
+  position: relative; z-index: 1;
+  margin-bottom: 0;
+}
+.hero-stats {
+  display: flex; justify-content: center; gap: 40px;
+  margin-top: 40px;
+  position: relative; z-index: 1;
+  flex-wrap: wrap;
+}
+.hero-stat strong {
+  display: block;
+  font-family: 'Playfair Display', serif;
+  font-size: 1.8rem; font-weight: 700;
+  color: white;
+}
+.hero-stat span { font-size: 12px; color: rgba(255,255,255,.5); text-transform: uppercase; letter-spacing: .07em; }
+
+/* SURVEY CONTAINER */
+.survey-wrap {
+  max-width: 740px;
+  margin: 0 auto;
+  padding: 50px 20px 80px;
+}
+
+/* PROGRESS */
+.progress-header {
+  display: flex; justify-content: space-between;
+  align-items: center; margin-bottom: 10px;
+}
+.progress-label { font-size: 13px; font-weight: 600; color: var(--soft); }
+.progress-count { font-size: 13px; font-weight: 700; color: var(--blue); }
+.progress-bar-track {
+  height: 6px; background: var(--border);
+  border-radius: 100px; overflow: hidden; margin-bottom: 36px;
+}
+.progress-bar-fill {
+  height: 100%; background: linear-gradient(90deg, var(--blue), var(--orange));
+  border-radius: 100px;
+  transition: width .4s cubic-bezier(.4,0,.2,1);
+}
+
+/* STEP SECTIONS */
+.step { display: none; animation: fadeUp .35s ease; }
+.step.active { display: block; }
+@keyframes fadeUp { from { opacity:0; transform:translateY(16px); } to { opacity:1; transform:translateY(0); } }
+
+/* SECTION CARD */
+.card {
+  background: var(--white);
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius);
+  padding: 36px 40px;
+  box-shadow: 0 4px 24px rgba(15,23,42,.07);
+  margin-bottom: 20px;
+}
+.card-title {
+  font-family: 'Playfair Display', serif;
+  font-size: 1.45rem; font-weight: 700;
+  color: var(--ink); margin-bottom: 6px;
+}
+.card-sub { font-size: 14px; color: var(--soft); margin-bottom: 28px; line-height: 1.6; }
+.card-sub-ur { font-size: 13px; color: #94a3b8; direction: rtl; display: block; margin-top: 4px; }
+
+/* FORM FIELDS */
+.field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; margin-bottom: 18px; }
+.field-row.full { grid-template-columns: 1fr; }
+.field { display: flex; flex-direction: column; gap: 8px; }
+.field label { font-size: 13px; font-weight: 600; color: var(--ink-mid); }
+.field label .ur { font-size: 12px; color: #94a3b8; direction: rtl; display: block; margin-top: 2px; }
+.field select, .field input {
+  padding: 13px 16px;
+  border: 2px solid var(--border);
+  border-radius: 11px;
+  font-size: 14px;
+  font-family: 'DM Sans', sans-serif;
+  color: var(--ink);
+  background: var(--white);
+  outline: none; transition: .2s;
+  appearance: none;
+}
+.field select {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%2364748b' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 14px center;
+  padding-right: 38px;
+}
+.field select:focus, .field input:focus {
+  border-color: var(--blue);
+  box-shadow: 0 0 0 4px rgba(26,86,219,.08);
+}
+
+/* QUESTION */
+.question { margin-bottom: 28px; }
+.question:last-child { margin-bottom: 0; }
+.q-num {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 26px; height: 26px;
+  background: var(--blue-light); color: var(--blue);
+  border-radius: 8px; font-size: 12px; font-weight: 700;
+  margin-bottom: 10px;
+}
+.q-text {
+  font-size: 15px; font-weight: 600; color: var(--ink);
+  line-height: 1.55; margin-bottom: 4px;
+}
+.q-text-ur {
+  font-size: 13px; color: var(--soft); direction: rtl;
+  display: block; margin-bottom: 14px; line-height: 1.6;
+}
+.options { display: flex; flex-direction: column; gap: 10px; }
+.opt {
+  display: flex; align-items: flex-start; gap: 12px;
+  padding: 14px 18px;
+  border: 2px solid var(--border);
+  border-radius: 12px;
+  cursor: pointer; transition: .2s;
+  position: relative;
+}
+.opt:hover { border-color: var(--blue); background: var(--blue-light); }
+.opt input[type="radio"] { position: absolute; opacity: 0; width: 0; height: 0; }
+.opt-radio {
+  width: 20px; height: 20px; border-radius: 50%;
+  border: 2px solid var(--border);
+  flex-shrink: 0; margin-top: 1px;
+  transition: .2s; position: relative;
+}
+.opt.selected {
+  border-color: var(--blue);
+  background: var(--blue-light);
+}
+.opt.selected .opt-radio {
+  border-color: var(--blue);
+  background: var(--blue);
+}
+.opt.selected .opt-radio::after {
+  content: '';
+  position: absolute; inset: 4px;
+  background: white; border-radius: 50%;
+}
+.opt-label { flex: 1; }
+.opt-en { font-size: 14px; font-weight: 500; color: var(--ink); display: block; line-height: 1.4; }
+.opt-ur { font-size: 12px; color: var(--soft); direction: rtl; display: block; margin-top: 3px; }
+
+/* KNOWLEDGE Q */
+.knowledge-tag {
+  display: inline-flex; align-items: center; gap: 6px;
+  background: var(--orange-light); color: var(--orange);
+  border: 1px solid rgba(249,115,22,.25);
+  border-radius: 100px; padding: 4px 12px;
+  font-size: 11px; font-weight: 700;
+  text-transform: uppercase; letter-spacing: .06em;
+  margin-bottom: 10px;
+}
+
+/* NAV BUTTONS */
+.nav-row {
+  display: flex; justify-content: space-between; align-items: center;
+  margin-top: 28px; flex-wrap: wrap; gap: 12px;
+}
+.btn {
+  display: inline-flex; align-items: center; gap: 8px;
+  padding: 14px 28px; border-radius: 100px;
+  font-size: 15px; font-weight: 700;
+  font-family: 'DM Sans', sans-serif;
+  cursor: pointer; transition: .2s; border: none;
+}
+.btn-back {
+  background: var(--white);
+  border: 2px solid var(--border);
+  color: var(--ink-mid);
+}
+.btn-back:hover { border-color: var(--blue); color: var(--blue); }
+.btn-next {
+  background: var(--blue);
+  color: white;
+  box-shadow: 0 6px 20px rgba(26,86,219,.3);
+}
+.btn-next:hover { background: var(--blue-dark); }
+.btn-submit {
+  background: linear-gradient(135deg, var(--blue), var(--orange));
+  color: white;
+  box-shadow: 0 6px 24px rgba(26,86,219,.3);
+}
+.btn-submit:hover { opacity: .92; }
+
+/* VALIDATION */
+.field-err {
+  font-size: 12px; color: #dc2626; font-weight: 500;
+  margin-top: 6px; display: none;
+}
+.field-err.show { display: block; }
+.q-err {
+  font-size: 12px; color: #dc2626; font-weight: 500;
+  margin-top: 8px; display: none;
+}
+.q-err.show { display: block; }
+
+/* SUCCESS */
+.success-screen {
+  text-align: center; padding: 60px 20px;
+  display: none;
+}
+.success-screen.show { display: block; }
+.success-icon {
+  width: 80px; height: 80px;
+  background: linear-gradient(135deg, var(--blue), var(--orange));
+  border-radius: 50%; display: flex; align-items: center; justify-content: center;
+  margin: 0 auto 28px;
+  box-shadow: 0 12px 40px rgba(26,86,219,.3);
+}
+.success-icon svg { width: 36px; }
+.success-screen h2 {
+  font-family: 'Playfair Display', serif;
+  font-size: 2rem; font-weight: 700; color: var(--ink); margin-bottom: 10px;
+}
+.success-screen p { font-size: 16px; color: var(--soft); line-height: 1.7; max-width: 440px; margin: 0 auto; }
+.success-screen .ur-thanks {
+  direction: rtl; font-size: 14px; color: #94a3b8; margin-top: 8px; display: block;
+}
+
+/* FOOTER */
+.site-footer {
+  background: var(--ink); color: rgba(255,255,255,.4);
+  text-align: center; padding: 28px 20px;
+  font-size: 13px;
+}
+.site-footer a { color: var(--orange); text-decoration: none; }
+
+/* Responsive */
+@media (max-width: 600px) {
+  .card { padding: 24px 20px; }
+  .field-row { grid-template-columns: 1fr; }
+  .hero { padding: 50px 20px; }
+  .hero-stats { gap: 24px; }
+  .site-header { padding: 0 20px; }
+}
+</style>
+</head>
+<body>
+
+<header class="site-header">
+  <div class="header-logo">
+    <div class="logo-mark">
+      <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <circle cx="12" cy="7" r="3" fill="white" opacity=".9"/>
+        <path d="M5 20c0-4 3-7 7-7s7 3 7 7" stroke="white" stroke-width="2" stroke-linecap="round"/>
+        <circle cx="18" cy="9" r="2" fill="white" opacity=".5"/>
+        <path d="M18 13v4M16 15h4" stroke="white" stroke-width="1.5" stroke-linecap="round"/>
+      </svg>
+    </div>
+    <div class="logo-name">
+      <strong>NOWPDP</strong>
+      <span>Disability Awareness Survey</span>
+    </div>
+  </div>
+  <div class="lang-toggle">
+    <button class="lang-btn active" onclick="setLang('en')">EN</button>
+    <button class="lang-btn" onclick="setLang('ur')">اردو</button>
+  </div>
+</header>
+
+<section class="hero">
+  <div class="hero-badge">
+    <svg width="12" height="12" viewBox="0 0 12 12" fill="currentColor"><circle cx="6" cy="6" r="5"/></svg>
+    NOWPDP · Pakistan
+  </div>
+  <h1>Know. Include. <em>Empower.</em></h1>
+  <p class="hero-sub">Help us understand public awareness of disability rights in Pakistan. Your responses shape more inclusive policies and communities.</p>
+  <p class="hero-sub-ur">معذوروں کے حقوق کے بارے میں آگاہی پیدا کرنے میں ہماری مدد کریں</p>
+  <div class="hero-stats">
+    <div class="hero-stat"><strong>5 min</strong><span>To complete</span></div>
+    <div class="hero-stat"><strong>12</strong><span>Questions</span></div>
+    <div class="hero-stat"><strong>100%</strong><span>Anonymous</span></div>
+  </div>
+</section>
+
+<div class="survey-wrap">
+
+  <!-- PROGRESS -->
+  <div id="progress-wrap">
+    <div class="progress-header">
+      <span class="progress-label" id="prog-label">Section 1 of 3 — Demographics</span>
+      <span class="progress-count" id="prog-count">0%</span>
+    </div>
+    <div class="progress-bar-track">
+      <div class="progress-bar-fill" id="prog-bar" style="width:0%"></div>
+    </div>
+  </div>
+
+  <!-- STEP 1: DEMOGRAPHICS -->
+  <div class="step active" id="step-1">
+    <div class="card">
+      <div class="card-title">About You</div>
+      <div class="card-sub">
+        All responses are anonymous and used for research only.
+        <span class="card-sub-ur">تمام جوابات گمنام ہیں اور صرف تحقیق کے لیے استعمال ہوں گے۔</span>
+      </div>
+      <div class="field-row">
+        <div class="field">
+          <label>Age Group <span class="ur">عمر کا گروپ</span></label>
+          <select id="f-age">
+            <option value="">Select age / عمر منتخب کریں</option>
+            <option value="Under 18">Under 18 / 18 سال سے کم</option>
+            <option value="18–24">18–24</option>
+            <option value="25–34">25–34</option>
+            <option value="35–44">35–44</option>
+            <option value="45+">45+</option>
+          </select>
+          <span class="field-err" id="err-age">Please select your age group.</span>
+        </div>
+        <div class="field">
+          <label>Gender <span class="ur">جنس</span></label>
+          <select id="f-gender">
+            <option value="">Select / منتخب کریں</option>
+            <option value="Male">Male / مرد</option>
+            <option value="Female">Female / خاتون</option>
+            <option value="Non-binary">Non-binary</option>
+            <option value="Prefer not to say">Prefer not to say / بتانا نہیں چاہتا</option>
+          </select>
+          <span class="field-err" id="err-gender">Please select your gender.</span>
+        </div>
+      </div>
+      <div class="field-row full">
+        <div class="field">
+          <label>Education Level <span class="ur">تعلیمی سطح</span></label>
+          <select id="f-edu">
+            <option value="">Select / منتخب کریں</option>
+            <option value="Below Matric">Below Matric / میٹرک سے کم</option>
+            <option value="Matric / O-Level">Matric / O-Level</option>
+            <option value="Intermediate / A-Level">Intermediate / A-Level</option>
+            <option value="Bachelor's">Bachelor's / بیچلر</option>
+            <option value="Master's or above">Master's or above / ماسٹر یا اس سے اوپر</option>
+            <option value="Prefer not to say">Prefer not to say / بتانا نہیں چاہتا</option>
+          </select>
+          <span class="field-err" id="err-edu">Please select your education level.</span>
+        </div>
+      </div>
+    </div>
+    <div class="nav-row">
+      <span></span>
+      <button class="btn btn-next" onclick="goNext(1)">Next →</button>
+    </div>
+  </div>
+
+  <!-- STEP 2: AWARENESS QUESTIONS -->
+  <div class="step" id="step-2">
+    <div class="card">
+      <div class="card-title">Disability Awareness</div>
+      <div class="card-sub">
+        Tell us about your awareness and attitudes toward people with disabilities.
+        <span class="card-sub-ur">معذور افراد کے بارے میں اپنی آگاہی اور رویے بتائیں۔</span>
+      </div>
+
+      <!-- Q1 -->
+      <div class="question" id="wrap-q1">
+        <div class="q-num">1</div>
+        <div class="q-text">Do you personally know or interact with someone who has a disability?</div>
+        <div class="q-text-ur">کیا آپ کی ذاتی جان پہچان یا تعامل کسی معذور شخص سے ہے؟</div>
+        <div class="options" id="opts-q1">
+          <label class="opt" onclick="selectOpt('q1',this)"><input type="radio" name="q1"/><div class="opt-radio"></div><div class="opt-label"><span class="opt-en">Yes, a family member</span><span class="opt-ur">ہاں، خاندان کا رکن</span></div></label>
+          <label class="opt" onclick="selectOpt('q1',this)"><input type="radio" name="q1"/><div class="opt-radio"></div><div class="opt-label"><span class="opt-en">Yes, a friend or colleague</span><span class="opt-ur">ہاں، دوست یا ساتھی</span></div></label>
+          <label class="opt" onclick="selectOpt('q1',this)"><input type="radio" name="q1"/><div class="opt-radio"></div><div class="opt-label"><span class="opt-en">Yes, a community member</span><span class="opt-ur">ہاں، برادری کا رکن</span></div></label>
+          <label class="opt" onclick="selectOpt('q1',this)"><input type="radio" name="q1"/><div class="opt-radio"></div><div class="opt-label"><span class="opt-en">No, I don't personally know anyone</span><span class="opt-ur">نہیں، میری ذاتی جان پہچان نہیں ہے</span></div></label>
+        </div>
+        <div class="q-err" id="err-q1">Please select an answer.</div>
+      </div>
+
+      <!-- Q2 -->
+      <div class="question" id="wrap-q2">
+        <div class="q-num">2</div>
+        <div class="q-text">How comfortable are you interacting with a person who has a disability?</div>
+        <div class="q-text-ur">آپ معذور شخص کے ساتھ بات چیت میں کتنا آرام محسوس کرتے ہیں؟</div>
+        <div class="options" id="opts-q2">
+          <label class="opt" onclick="selectOpt('q2',this)"><input type="radio" name="q2"/><div class="opt-radio"></div><div class="opt-label"><span class="opt-en">Very comfortable</span><span class="opt-ur">بہت آرام دہ</span></div></label>
+          <label class="opt" onclick="selectOpt('q2',this)"><input type="radio" name="q2"/><div class="opt-radio"></div><div class="opt-label"><span class="opt-en">Somewhat comfortable</span><span class="opt-ur">کسی حد تک آرام دہ</span></div></label>
+          <label class="opt" onclick="selectOpt('q2',this)"><input type="radio" name="q2"/><div class="opt-radio"></div><div class="opt-label"><span class="opt-en">Uncomfortable at times</span><span class="opt-ur">کبھی کبھی بے آرامی</span></div></label>
+          <label class="opt" onclick="selectOpt('q2',this)"><input type="radio" name="q2"/><div class="opt-radio"></div><div class="opt-label"><span class="opt-en">Not comfortable</span><span class="opt-ur">آرام دہ نہیں</span></div></label>
+        </div>
+        <div class="q-err" id="err-q2">Please select an answer.</div>
+      </div>
+
+      <!-- Q3 -->
+      <div class="question" id="wrap-q3">
+        <div class="q-num">3</div>
+        <div class="q-text">In your view, how well does society include people with disabilities in everyday life?</div>
+        <div class="q-text-ur">آپ کے خیال میں معاشرہ معذور افراد کو روزمرہ زندگی میں کتنا شامل کرتا ہے؟</div>
+        <div class="options" id="opts-q3">
+          <label class="opt" onclick="selectOpt('q3',this)"><input type="radio" name="q3"/><div class="opt-radio"></div><div class="opt-label"><span class="opt-en">Very well included</span><span class="opt-ur">بہت اچھی طرح شامل</span></div></label>
+          <label class="opt" onclick="selectOpt('q3',this)"><input type="radio" name="q3"/><div class="opt-radio"></div><div class="opt-label"><span class="opt-en">Partially included</span><span class="opt-ur">جزوی طور پر شامل</span></div></label>
+          <label class="opt" onclick="selectOpt('q3',this)"><input type="radio" name="q3"/><div class="opt-radio"></div><div class="opt-label"><span class="opt-en">Mostly excluded</span><span class="opt-ur">زیادہ تر خارج</span></div></label>
+          <label class="opt" onclick="selectOpt('q3',this)"><input type="radio" name="q3"/><div class="opt-radio"></div><div class="opt-label"><span class="opt-en">Completely excluded</span><span class="opt-ur">مکمل طور پر خارج</span></div></label>
+        </div>
+        <div class="q-err" id="err-q3">Please select an answer.</div>
+      </div>
+
+      <!-- Q4 -->
+      <div class="question" id="wrap-q4">
+        <div class="q-num">4</div>
+        <div class="q-text">How accessible do you find public spaces (markets, transport, schools) for people with disabilities?</div>
+        <div class="q-text-ur">آپ کے خیال میں عوامی مقامات (بازار، ٹرانسپورٹ، اسکول) معذور افراد کے لیے کتنے قابل رسائی ہیں؟</div>
+        <div class="options" id="opts-q4">
+          <label class="opt" onclick="selectOpt('q4',this)"><input type="radio" name="q4"/><div class="opt-radio"></div><div class="opt-label"><span class="opt-en">Very accessible</span><span class="opt-ur">بہت قابل رسائی</span></div></label>
+          <label class="opt" onclick="selectOpt('q4',this)"><input type="radio" name="q4"/><div class="opt-radio"></div><div class="opt-label"><span class="opt-en">Somewhat accessible</span><span class="opt-ur">کسی حد تک قابل رسائی</span></div></label>
+          <label class="opt" onclick="selectOpt('q4',this)"><input type="radio" name="q4"/><div class="opt-radio"></div><div class="opt-label"><span class="opt-en">Mostly inaccessible</span><span class="opt-ur">زیادہ تر ناقابل رسائی</span></div></label>
+          <label class="opt" onclick="selectOpt('q4',this)"><input type="radio" name="q4"/><div class="opt-radio"></div><div class="opt-label"><span class="opt-en">Completely inaccessible</span><span class="opt-ur">مکمل طور پر ناقابل رسائی</span></div></label>
+        </div>
+        <div class="q-err" id="err-q4">Please select an answer.</div>
+      </div>
+
+    </div>
+    <div class="nav-row">
+      <button class="btn btn-back" onclick="goBack(2)">← Back</button>
+      <button class="btn btn-next" onclick="goNext(2)">Next →</button>
+    </div>
+  </div>
+
+  <!-- STEP 3: MORE AWARENESS + KNOWLEDGE -->
+  <div class="step" id="step-3">
+    <div class="card">
+      <div class="card-title">Attitudes & Support</div>
+      <div class="card-sub">
+        Tell us about your views on support and inclusion for people with disabilities.
+        <span class="card-sub-ur">معذور افراد کی مدد اور شمولیت کے بارے میں اپنے خیالات بتائیں۔</span>
+      </div>
+
+      <!-- Q5 -->
+      <div class="question" id="wrap-q5">
+        <div class="q-num">5</div>
+        <div class="q-text">Should students with disabilities be educated in the same schools as other students?</div>
+        <div class="q-text-ur">کیا معذور طلباء کو دوسرے طلباء کے ساتھ ایک ہی اسکول میں پڑھنا چاہیے؟</div>
+        <div class="options" id="opts-q5">
+          <label class="opt" onclick="selectOpt('q5',this)"><input type="radio" name="q5"/><div class="opt-radio"></div><div class="opt-label"><span class="opt-en">Yes, fully included in mainstream schools</span><span class="opt-ur">ہاں، مرکزی دھارے کے اسکولوں میں مکمل شمولیت</span></div></label>
+          <label class="opt" onclick="selectOpt('q5',this)"><input type="radio" name="q5"/><div class="opt-radio"></div><div class="opt-label"><span class="opt-en">Yes, with additional support resources</span><span class="opt-ur">ہاں، اضافی معاون وسائل کے ساتھ</span></div></label>
+          <label class="opt" onclick="selectOpt('q5',this)"><input type="radio" name="q5"/><div class="opt-radio"></div><div class="opt-label"><span class="opt-en">It depends on the type of disability</span><span class="opt-ur">یہ معذوری کی نوعیت پر منحصر ہے</span></div></label>
+          <label class="opt" onclick="selectOpt('q5',this)"><input type="radio" name="q5"/><div class="opt-radio"></div><div class="opt-label"><span class="opt-en">No, separate specialized schools are better</span><span class="opt-ur">نہیں، علیحدہ خصوصی اسکول بہتر ہیں</span></div></label>
+        </div>
+        <div class="q-err" id="err-q5">Please select an answer.</div>
+      </div>
+
+      <!-- Q6 -->
+      <div class="question" id="wrap-q6">
+        <div class="q-num">6</div>
+        <div class="q-text">Do you think employers in Pakistan give fair job opportunities to persons with disabilities?</div>
+        <div class="q-text-ur">کیا آپ کو لگتا ہے کہ پاکستان میں آجر معذور افراد کو مناسب ملازمت کے مواقع دیتے ہیں؟</div>
+        <div class="options" id="opts-q6">
+          <label class="opt" onclick="selectOpt('q6',this)"><input type="radio" name="q6"/><div class="opt-radio"></div><div class="opt-label"><span class="opt-en">Yes, in most cases</span><span class="opt-ur">ہاں، زیادہ تر معاملات میں</span></div></label>
+          <label class="opt" onclick="selectOpt('q6',this)"><input type="radio" name="q6"/><div class="opt-radio"></div><div class="opt-label"><span class="opt-en">Sometimes, but not consistently</span><span class="opt-ur">کبھی کبھی، لیکن مستقل نہیں</span></div></label>
+          <label class="opt" onclick="selectOpt('q6',this)"><input type="radio" name="q6"/><div class="opt-radio"></div><div class="opt-label"><span class="opt-en">Rarely</span><span class="opt-ur">شاذ و نادر</span></div></label>
+          <label class="opt" onclick="selectOpt('q6',this)"><input type="radio" name="q6"/><div class="opt-radio"></div><div class="opt-label"><span class="opt-en">No, there is significant discrimination</span><span class="opt-ur">نہیں، نمایاں امتیاز ہے</span></div></label>
+        </div>
+        <div class="q-err" id="err-q6">Please select an answer.</div>
+      </div>
+
+      <!-- Q7 -->
+      <div class="question" id="wrap-q7">
+        <div class="q-num">7</div>
+        <div class="q-text">Have you ever spoken up or taken action to support a person with a disability being treated unfairly?</div>
+        <div class="q-text-ur">کیا آپ نے کبھی کسی معذور شخص کے ساتھ ناانصافی ہوتے دیکھ کر آواز اٹھائی یا عمل کیا؟</div>
+        <div class="options" id="opts-q7">
+          <label class="opt" onclick="selectOpt('q7',this)"><input type="radio" name="q7"/><div class="opt-radio"></div><div class="opt-label"><span class="opt-en">Yes, I have intervened directly</span><span class="opt-ur">ہاں، میں نے براہ راست مداخلت کی</span></div></label>
+          <label class="opt" onclick="selectOpt('q7',this)"><input type="radio" name="q7"/><div class="opt-radio"></div><div class="opt-label"><span class="opt-en">Yes, I reported it to someone</span><span class="opt-ur">ہاں، میں نے کسی کو رپورٹ کیا</span></div></label>
+          <label class="opt" onclick="selectOpt('q7',this)"><input type="radio" name="q7"/><div class="opt-radio"></div><div class="opt-label"><span class="opt-en">No, but I wish I had</span><span class="opt-ur">نہیں، لیکن کاش کرتا</span></div></label>
+          <label class="opt" onclick="selectOpt('q7',this)"><input type="radio" name="q7"/><div class="opt-radio"></div><div class="opt-label"><span class="opt-en">I have never witnessed such a situation</span><span class="opt-ur">میں نے کبھی ایسی صورتحال نہیں دیکھی</span></div></label>
+        </div>
+        <div class="q-err" id="err-q7">Please select an answer.</div>
+      </div>
+
+    </div>
+
+    <!-- KNOWLEDGE SECTION -->
+    <div class="card" style="margin-top:20px;">
+      <div class="card-title">Disability Rights — Knowledge Check</div>
+      <div class="card-sub">
+        Test your knowledge of disability rights and laws in Pakistan.
+        <span class="card-sub-ur">پاکستان میں معذوری کے حقوق اور قوانین کے بارے میں اپنی معلومات جانچیں۔</span>
+      </div>
+
+      <!-- Q8 -->
+      <div class="question" id="wrap-q8">
+        <div class="knowledge-tag">⭐ Knowledge</div>
+        <div class="q-num">8</div>
+        <div class="q-text">Are you aware that Pakistan has a national law specifically protecting the rights of persons with disabilities?</div>
+        <div class="q-text-ur">کیا آپ کو علم ہے کہ پاکستان میں معذور افراد کے حقوق کے تحفظ کے لیے ایک قومی قانون موجود ہے؟</div>
+        <div class="options" id="opts-q8">
+          <label class="opt" onclick="selectOpt('q8',this)"><input type="radio" name="q8"/><div class="opt-radio"></div><div class="opt-label"><span class="opt-en">Yes, I am fully aware</span><span class="opt-ur">ہاں، مجھے پوری طرح علم ہے</span></div></label>
+          <label class="opt" onclick="selectOpt('q8',this)"><input type="radio" name="q8"/><div class="opt-radio"></div><div class="opt-label"><span class="opt-en">I heard about it but don't know details</span><span class="opt-ur">میں نے سنا ہے لیکن تفصیل نہیں جانتا</span></div></label>
+          <label class="opt" onclick="selectOpt('q8',this)"><input type="radio" name="q8"/><div class="opt-radio"></div><div class="opt-label"><span class="opt-en">No, I was not aware</span><span class="opt-ur">نہیں، مجھے علم نہیں تھا</span></div></label>
+          <label class="opt" onclick="selectOpt('q8',this)"><input type="radio" name="q8"/><div class="opt-radio"></div><div class="opt-label"><span class="opt-en">Not sure</span><span class="opt-ur">یقین نہیں</span></div></label>
+        </div>
+        <div class="q-err" id="err-q8">Please select an answer.</div>
+      </div>
+
+      <!-- Q9 -->
+      <div class="question" id="wrap-q9">
+        <div class="knowledge-tag">⭐ Knowledge</div>
+        <div class="q-num">9</div>
+        <div class="q-text">Pakistan's Constitution guarantees equal rights for citizens with disabilities. Were you aware of this?</div>
+        <div class="q-text-ur">پاکستان کا آئین معذور شہریوں کو مساوی حقوق کی ضمانت دیتا ہے۔ کیا آپ اس سے آگاہ تھے؟</div>
+        <div class="options" id="opts-q9">
+          <label class="opt" onclick="selectOpt('q9',this)"><input type="radio" name="q9"/><div class="opt-radio"></div><div class="opt-label"><span class="opt-en">Yes, I knew this</span><span class="opt-ur">ہاں، مجھے معلوم تھا</span></div></label>
+          <label class="opt" onclick="selectOpt('q9',this)"><input type="radio" name="q9"/><div class="opt-radio"></div><div class="opt-label"><span class="opt-en">I had a general idea</span><span class="opt-ur">مجھے عمومی اندازہ تھا</span></div></label>
+          <label class="opt" onclick="selectOpt('q9',this)"><input type="radio" name="q9"/><div class="opt-radio"></div><div class="opt-label"><span class="opt-en">No, I did not know</span><span class="opt-ur">نہیں، مجھے نہیں معلوم تھا</span></div></label>
+          <label class="opt" onclick="selectOpt('q9',this)"><input type="radio" name="q9"/><div class="opt-radio"></div><div class="opt-label"><span class="opt-en">Not sure</span><span class="opt-ur">یقین نہیں</span></div></label>
+        </div>
+        <div class="q-err" id="err-q9">Please select an answer.</div>
+      </div>
+
+      <!-- Q10 -->
+      <div class="question" id="wrap-q10">
+        <div class="knowledge-tag">⭐ Knowledge</div>
+        <div class="q-num">10</div>
+        <div class="q-text">The Government of Pakistan is required by law to reserve job quota for persons with disabilities. Were you aware of this?</div>
+        <div class="q-text-ur">قانون کے تحت حکومت پاکستان معذور افراد کے لیے ملازمت کا کوٹہ مخصوص کرنے کی پابند ہے۔ کیا آپ اس سے آگاہ تھے؟</div>
+        <div class="options" id="opts-q10">
+          <label class="opt" onclick="selectOpt('q10',this)"><input type="radio" name="q10"/><div class="opt-radio"></div><div class="opt-label"><span class="opt-en">Yes, fully aware</span><span class="opt-ur">ہاں، پوری طرح آگاہ</span></div></label>
+          <label class="opt" onclick="selectOpt('q10',this)"><input type="radio" name="q10"/><div class="opt-radio"></div><div class="opt-label"><span class="opt-en">I had some idea</span><span class="opt-ur">مجھے کچھ اندازہ تھا</span></div></label>
+          <label class="opt" onclick="selectOpt('q10',this)"><input type="radio" name="q10"/><div class="opt-radio"></div><div class="opt-label"><span class="opt-en">No, I was not aware</span><span class="opt-ur">نہیں، مجھے علم نہیں تھا</span></div></label>
+          <label class="opt" onclick="selectOpt('q10',this)"><input type="radio" name="q10"/><div class="opt-radio"></div><div class="opt-label"><span class="opt-en">Not sure</span><span class="opt-ur">یقین نہیں</span></div></label>
+        </div>
+        <div class="q-err" id="err-q10">Please select an answer.</div>
+      </div>
+
+      <!-- Q11 -->
+      <div class="question" id="wrap-q11">
+        <div class="knowledge-tag">⭐ Knowledge</div>
+        <div class="q-num">11</div>
+        <div class="q-text">Do you know what NOWPDP (Network of Organizations Working with People with Disabilities in Pakistan) does?</div>
+        <div class="q-text-ur">کیا آپ جانتے ہیں کہ NOWPDP (پاکستان میں معذور افراد کے ساتھ کام کرنے والی تنظیموں کا نیٹ ورک) کیا کرتا ہے؟</div>
+        <div class="options" id="opts-q11">
+          <label class="opt" onclick="selectOpt('q11',this)"><input type="radio" name="q11"/><div class="opt-radio"></div><div class="opt-label"><span class="opt-en">Yes, I know it well</span><span class="opt-ur">ہاں، میں اسے اچھی طرح جانتا ہوں</span></div></label>
+          <label class="opt" onclick="selectOpt('q11',this)"><input type="radio" name="q11"/><div class="opt-radio"></div><div class="opt-label"><span class="opt-en">I've heard of it but not sure of its role</span><span class="opt-ur">میں نے سنا ہے لیکن اس کے کردار سے واقف نہیں</span></div></label>
+          <label class="opt" onclick="selectOpt('q11',this)"><input type="radio" name="q11"/><div class="opt-radio"></div><div class="opt-label"><span class="opt-en">No, I'm hearing about it for the first time</span><span class="opt-ur">نہیں، میں پہلی بار سن رہا ہوں</span></div></label>
+        </div>
+        <div class="q-err" id="err-q11">Please select an answer.</div>
+      </div>
+
+      <!-- Q12 -->
+      <div class="question" id="wrap-q12">
+        <div class="q-num">12</div>
+        <div class="q-text">Would you like to learn more about disability awareness, rights, and NOWPDP's work in Pakistan?</div>
+        <div class="q-text-ur">کیا آپ معذوری کی آگاہی، حقوق اور NOWPDP کے بارے میں مزید جاننا چاہیں گے؟</div>
+        <div class="options" id="opts-q12">
+          <label class="opt" onclick="selectOpt('q12',this)"><input type="radio" name="q12"/><div class="opt-radio"></div><div class="opt-label"><span class="opt-en">Yes, click here to learn more</span><span class="opt-ur">ہاں، مزید جاننے کے لیے یہاں کلک کریں</span></div></label>
+          <label class="opt" onclick="selectOpt('q12',this)"><input type="radio" name="q12"/><div class="opt-radio"></div><div class="opt-label"><span class="opt-en">Maybe later</span><span class="opt-ur">شاید بعد میں</span></div></label>
+          <label class="opt" onclick="selectOpt('q12',this)"><input type="radio" name="q12"/><div class="opt-radio"></div><div class="opt-label"><span class="opt-en">Not interested</span><span class="opt-ur">دلچسپی نہیں</span></div></label>
+        </div>
+        <div class="q-err" id="err-q12">Please select an answer.</div>
+      </div>
+
+    </div>
+    <div class="nav-row">
+      <button class="btn btn-back" onclick="goBack(3)">← Back</button>
+      <button class="btn btn-submit" onclick="submitSurvey()">Submit Survey ✓</button>
+    </div>
+  </div>
+
+  <!-- SUCCESS SCREEN -->
+  <div class="success-screen" id="success">
+    <div class="success-icon">
+      <svg viewBox="0 0 36 36" fill="none"><path d="M10 18l6 6L26 12" stroke="white" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    </div>
+    <h2>Thank You!</h2>
+    <p>Your response has been recorded. Together we are building a more inclusive Pakistan for persons with disabilities.</p>
+    <span class="ur-thanks">آپ کا شکریہ — آپ کا جواب درج کر لیا گیا ہے۔</span>
+    <div style="margin-top:36px;" id="btn-repeat">
+      <a href="index.html" style="text-decoration:none;">
+        <button class="btn btn-next" style="margin:0 auto;">Take Survey Again</button>
+      </a>
+    </div>
+    <div style="margin-top:16px;" id="btn-learn">
+      <a href="awareness.html" style="text-decoration:none;">
+        <button class="btn btn-back" style="margin:0 auto;">Learn More →</button>
+      </a>
+    </div>
+  </div>
+
+</div>
+
+<footer class="site-footer">
+  © 2025 <a href="#">NOWPDP</a> — Network of Organizations Working with People with Disabilities in Pakistan
+</footer>
+
+<script>
+let currentLang = 'en';
+let answers = {};
+
+// Language toggle — show/hide Urdu labels
+function setLang(lang) {
+  currentLang = lang;
+  document.querySelectorAll('.lang-btn').forEach((b,i) => {
+    b.classList.toggle('active', (i===0 && lang==='en') || (i===1 && lang==='ur'));
+  });
+  const isUr = lang === 'ur';
+  document.querySelectorAll('.q-text-ur, .card-sub-ur, .opt-ur, .ur-thanks, .field label .ur').forEach(el => {
+    el.style.display = isUr ? 'block' : 'none';
+  });
+  if (!isUr) {
+    document.querySelectorAll('.q-text-ur, .opt-ur').forEach(el => el.style.display = 'none');
+  }
+}
+// Hide Urdu by default on load
+window.addEventListener('DOMContentLoaded', () => {
+  document.querySelectorAll('.q-text-ur, .card-sub-ur, .opt-ur, .ur-thanks, .field label .ur').forEach(el => {
+    el.style.display = 'none';
+  });
+});
+
+function selectOpt(qKey, el) {
+  const opts = el.closest('.options').querySelectorAll('.opt');
+  opts.forEach(o => o.classList.remove('selected'));
+  el.classList.add('selected');
+  answers[qKey] = el.querySelector('.opt-en').textContent.trim();
+  document.getElementById('err-' + qKey).classList.remove('show');
+  updateProgress();
+}
+
+function updateProgress() {
+  const step = getCurrentStep();
+  const totalSteps = 3;
+  const base = ((step - 1) / totalSteps) * 100;
+  const stepQs = getStepQuestions(step);
+  const answered = stepQs.filter(q => answers[q]).length;
+  const stepProgress = stepQs.length > 0 ? (answered / stepQs.length) * (100 / totalSteps) : 0;
+  const pct = Math.round(base + stepProgress);
+  document.getElementById('prog-bar').style.width = pct + '%';
+  document.getElementById('prog-count').textContent = pct + '%';
+}
+
+function getStepQuestions(step) {
+  if (step === 1) return [];
+  if (step === 2) return ['q1','q2','q3','q4'];
+  if (step === 3) return ['q5','q6','q7','q8','q9','q10','q11','q12'];
+  return [];
+}
+
+function getCurrentStep() {
+  for (let i = 1; i <= 3; i++) {
+    if (document.getElementById('step-' + i).classList.contains('active')) return i;
+  }
+  return 1;
+}
+
+function goNext(fromStep) {
+  if (fromStep === 1) {
+    let ok = true;
+    if (!document.getElementById('f-age').value) { document.getElementById('err-age').classList.add('show'); ok = false; }
+    if (!document.getElementById('f-gender').value) { document.getElementById('err-gender').classList.add('show'); ok = false; }
+    if (!document.getElementById('f-edu').value) { document.getElementById('err-edu').classList.add('show'); ok = false; }
+    if (!ok) return;
+  }
+  if (fromStep === 2) {
+    let ok = true;
+    ['q1','q2','q3','q4'].forEach(q => {
+      if (!answers[q]) { document.getElementById('err-' + q).classList.add('show'); ok = false; }
+    });
+    if (!ok) return;
+  }
+  document.getElementById('step-' + fromStep).classList.remove('active');
+  document.getElementById('step-' + (fromStep + 1)).classList.add('active');
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+  const labels = ['Section 1 of 3 — Demographics', 'Section 2 of 3 — Awareness', 'Section 3 of 3 — Rights & Knowledge'];
+  document.getElementById('prog-label').textContent = labels[fromStep];
+  updateProgress();
+}
+
+function goBack(fromStep) {
+  document.getElementById('step-' + fromStep).classList.remove('active');
+  document.getElementById('step-' + (fromStep - 1)).classList.add('active');
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+async function submitSurvey() {
+  let ok = true;
+  ['q5','q6','q7','q8','q9','q10','q11','q12'].forEach(q => {
+    if (!answers[q]) { document.getElementById('err-' + q).classList.add('show'); ok = false; }
+  });
+  if (!ok) return;
+
+  const btn = document.querySelector('.btn-submit');
+  btn.disabled = true;
+  btn.textContent = 'Submitting...';
+
+  const payload = {
+    age: document.getElementById('f-age').value,
+    gender: document.getElementById('f-gender').value,
+    education: document.getElementById('f-edu').value,
+    q1: answers.q1 || null,
+    q2: answers.q2 || null,
+    q3: answers.q3 || null,
+    q4: answers.q4 || null,
+    q5: answers.q5 || null,
+    q6: answers.q6 || null,
+    q7: answers.q7 || null,
+    q8: answers.q8 || null,
+    q9: answers.q9 || null,
+    q10: answers.q10 || null,
+    q11: answers.q11 || null,
+    q12: answers.q12 || null,
+  };
+
+  try {
+    if (_sbClient) {
+      const { error } = await _sbClient.from('responses').insert([payload]);
+      if (error) console.error('Supabase error:', error);
+    } else {
+      console.log('No Supabase client — payload:', payload);
+    }
+  } catch(e) {
+    console.error('Submit error:', e);
+  }
+
+  document.getElementById('step-3').classList.remove('active');
+  document.getElementById('progress-wrap').style.display = 'none';
+  document.getElementById('success').classList.add('show');
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+
+  const btnRepeat = document.getElementById('btn-repeat');
+  const btnLearn = document.getElementById('btn-learn');
+  
+  if (answers.q12 && answers.q12.includes('Yes')) {
+    btnRepeat.style.display = 'none';
+    btnLearn.style.display = 'none';
+    setTimeout(() => {
+      window.location.href = 'awareness.html';
+    }, 1500);
+  } else {
+    btnRepeat.style.display = 'block';
+    btnLearn.style.display = 'block';
+  }
+}
+</script>
+</body>
+</html>

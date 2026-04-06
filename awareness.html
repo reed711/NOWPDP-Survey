@@ -1,0 +1,361 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Learn More — Disability Awareness | NOWPDP</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
+<style>
+:root {
+  --blue: #1a56db; --blue-dark: #1045b8; --blue-light: #eff4ff;
+  --orange: #f97316; --orange-light: #fff7ed;
+  --ink: #0f172a; --ink-mid: #334155; --soft: #64748b;
+  --border: #e2e8f0; --bg: #f8fafc; --white: #ffffff;
+  --radius: 16px;
+}
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+body {
+  font-family: 'DM Sans', sans-serif;
+  background: var(--bg);
+  color: var(--ink);
+  line-height: 1.7;
+}
+a { color: var(--blue); text-decoration: none; }
+a:hover { text-decoration: underline; }
+
+/* HEADER */
+.site-header {
+  background: var(--ink);
+  padding: 0 40px;
+  height: 70px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+.header-logo { display: flex; align-items: center; gap: 14px; }
+.logo-mark {
+  width: 42px; height: 42px;
+  background: var(--blue);
+  border-radius: 12px;
+  display: flex; align-items: center; justify-content: center;
+}
+.logo-mark svg { width: 22px; }
+.logo-name strong {
+  font-family: 'Playfair Display', serif;
+  font-size: 15px; font-weight: 700;
+  color: white; display: block;
+}
+.logo-name span { font-size: 10px; color: rgba(255,255,255,.4); text-transform: uppercase; letter-spacing: .09em; }
+.lang-toggle { display: flex; gap: 6px; }
+.lang-btn {
+  padding: 7px 18px;
+  border-radius: 100px;
+  font-size: 13px; font-weight: 600;
+  cursor: pointer; transition: .2s;
+  font-family: 'DM Sans', sans-serif;
+  border: 2px solid rgba(255,255,255,.2);
+  color: rgba(255,255,255,.6);
+  background: transparent;
+}
+.lang-btn.active {
+  background: var(--orange);
+  border-color: var(--orange);
+  color: white;
+}
+
+/* HERO */
+.hero {
+  background: linear-gradient(135deg, var(--ink) 0%, #1e3a5f 100%);
+  padding: 70px 40px;
+  text-align: center;
+  position: relative;
+  overflow: hidden;
+}
+.hero::before {
+  content: '';
+  position: absolute; inset: 0;
+  background:
+    radial-gradient(ellipse at 20% 50%, rgba(26,86,219,.35) 0%, transparent 60%),
+    radial-gradient(ellipse at 80% 30%, rgba(249,115,22,.2) 0%, transparent 55%);
+}
+.hero-badge {
+  display: inline-flex; align-items: center; gap: 8px;
+  background: rgba(249,115,22,.15);
+  border: 1px solid rgba(249,115,22,.3);
+  border-radius: 100px;
+  padding: 7px 18px;
+  font-size: 12px; font-weight: 600;
+  color: var(--orange);
+  margin-bottom: 24px;
+  position: relative; z-index: 1;
+  letter-spacing: .05em; text-transform: uppercase;
+}
+.hero h1 {
+  font-family: 'Playfair Display', serif;
+  font-size: clamp(1.8rem, 4vw, 2.6rem);
+  font-weight: 700; line-height: 1.2;
+  color: white; margin-bottom: 14px;
+  position: relative; z-index: 1;
+}
+.hero h1 em { color: var(--orange); font-style: normal; }
+.hero-sub {
+  font-size: 15px; font-weight: 300;
+  color: rgba(255,255,255,.7);
+  max-width: 600px; margin: 0 auto;
+  position: relative; z-index: 1;
+}
+
+/* CONTENT */
+.content { max-width: 800px; margin: 0 auto; padding: 50px 24px 80px; }
+.article-section {
+  background: var(--white);
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius);
+  padding: 36px 40px;
+  margin-bottom: 24px;
+  box-shadow: 0 4px 24px rgba(15,23,42,.06);
+}
+.article-section h2 {
+  font-family: 'Playfair Display', serif;
+  font-size: 1.5rem; font-weight: 700;
+  color: var(--ink);
+  margin-bottom: 20px;
+  display: flex; align-items: center; gap: 12px;
+}
+.section-num {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 36px; height: 36px;
+  background: var(--blue-light);
+  color: var(--blue);
+  border-radius: 10px;
+  font-size: 14px; font-weight: 700;
+  flex-shrink: 0;
+}
+.article-section p {
+  font-size: 15px;
+  color: var(--ink-mid);
+  margin-bottom: 16px;
+}
+.article-section p:last-child { margin-bottom: 0; }
+.article-section .ur-text {
+  font-size: 14px;
+  color: var(--soft);
+  direction: rtl;
+  display: none;
+  margin-top: 8px;
+  line-height: 1.8;
+}
+
+/* STATS */
+.stats-row {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+  margin: 24px 0;
+}
+.stat-box {
+  background: var(--blue-light);
+  border-radius: 12px;
+  padding: 20px 16px;
+  text-align: center;
+}
+.stat-box.orange { background: var(--orange-light); }
+.stat-box strong {
+  display: block;
+  font-family: 'Playfair Display', serif;
+  font-size: 1.8rem; font-weight: 700;
+  color: var(--blue);
+  margin-bottom: 4px;
+}
+.stat-box.orange strong { color: var(--orange); }
+.stat-box span { font-size: 12px; color: var(--soft); }
+
+/* CTA */
+.cta-section {
+  background: linear-gradient(135deg, var(--ink) 0%, #1e3a5f 100%);
+  border-radius: var(--radius);
+  padding: 40px;
+  text-align: center;
+  position: relative;
+  overflow: hidden;
+}
+.cta-section::before {
+  content: '';
+  position: absolute; inset: 0;
+  background:
+    radial-gradient(ellipse at 30% 20%, rgba(26,86,219,.3) 0%, transparent 50%),
+    radial-gradient(ellipse at 70% 80%, rgba(249,115,22,.2) 0%, transparent 50%);
+}
+.cta-section h3 {
+  font-family: 'Playfair Display', serif;
+  font-size: 1.6rem; font-weight: 700;
+  color: white;
+  margin-bottom: 10px;
+  position: relative; z-index: 1;
+}
+.cta-section p {
+  color: rgba(255,255,255,.7);
+  font-size: 14px;
+  margin-bottom: 24px;
+  position: relative; z-index: 1;
+}
+.cta-links {
+  display: flex; justify-content: center; gap: 14px;
+  flex-wrap: wrap;
+  position: relative; z-index: 1;
+}
+.cta-btn {
+  display: inline-flex; align-items: center; gap: 8px;
+  padding: 12px 24px;
+  border-radius: 100px;
+  font-size: 14px; font-weight: 600;
+  font-family: 'DM Sans', sans-serif;
+  text-decoration: none;
+  transition: .2s;
+}
+.cta-btn.primary {
+  background: var(--blue);
+  color: white;
+}
+.cta-btn.primary:hover { background: var(--blue-dark); }
+.cta-btn.secondary {
+  background: transparent;
+  border: 2px solid rgba(255,255,255,.3);
+  color: white;
+}
+.cta-btn.secondary:hover { border-color: var(--orange); color: var(--orange); }
+
+/* FOOTER */
+.site-footer {
+  background: var(--ink);
+  color: rgba(255,255,255,.4);
+  text-align: center;
+  padding: 28px 20px;
+  font-size: 13px;
+}
+.site-footer a { color: var(--orange); }
+
+/* Responsive */
+@media (max-width: 600px) {
+  .site-header { padding: 0 20px; }
+  .hero { padding: 50px 20px; }
+  .content { padding: 30px 16px 60px; }
+  .article-section { padding: 24px 20px; }
+  .stats-row { grid-template-columns: 1fr; }
+  .cta-section { padding: 30px 20px; }
+  .cta-links { flex-direction: column; align-items: center; }
+}
+</style>
+</head>
+<body>
+
+<header class="site-header">
+  <div class="header-logo">
+    <a href="index.html" style="text-decoration:none;display:flex;align-items:center;gap:14px;">
+      <div class="logo-mark">
+        <svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="7" r="3" fill="white" opacity=".9"/><path d="M5 20c0-4 3-7 7-7s7 3 7 7" stroke="white" stroke-width="2" stroke-linecap="round"/></svg>
+      </div>
+      <div class="logo-name">
+        <strong>NOWPDP</strong>
+        <span>Disability Awareness</span>
+      </div>
+    </a>
+  </div>
+  <div class="lang-toggle">
+    <button class="lang-btn active" onclick="setLang('en')">EN</button>
+    <button class="lang-btn" onclick="setLang('ur')">اردو</button>
+  </div>
+</header>
+
+<section class="hero">
+  <div class="hero-badge">
+    <svg width="12" height="12" viewBox="0 0 12 12" fill="currentColor"><circle cx="6" cy="6" r="5"/></svg>
+    Learn More
+  </div>
+  <h1>Understanding Disability <em>In Pakistan</em></h1>
+  <p class="hero-sub">Expand your knowledge about disability rights, inclusion, and how you can make a difference.</p>
+</section>
+
+<div class="content">
+
+  <!-- SECTION 1 -->
+  <div class="article-section">
+    <h2><span class="section-num">1</span> Disability in Pakistan</h2>
+    <p>According to Pakistan's 2023 census, approximately 9.64% of the population — roughly 20 million people — live with some form of disability. Despite progressive legislation and international commitments, millions of disabled Pakistanis remain systematically excluded from education, employment, and public life. <span class="ur-text">پاکستان کی 2023 کی مردم شماری کے مطابق، آبادی کا تقریباً 9.64 فیصد — تقریباً 20 ملین لوگ — کسی نہ کسی قسم کی معذوری کے ساتھ زندگی گزارتے ہیں۔</span></p>
+    <p>Public spaces remain largely inaccessible — most buildings lack ramps, elevators, and accessible restrooms. Transportation systems rarely accommodate wheelchairs or other mobility aids. Employment opportunities are scarce, with employers often hesitant to hire persons with disabilities despite legal quotas. Educational inclusion faces significant barriers, with many schools unprepared to support students with diverse needs. <span class="ur-text">عوامی مقامات بڑی حد تک ناقابل رسائی ہیں — زیادہ تر عمارتوں میں ریمپ، لیفٹ اور رسائی والے washrooms نہیں ہیں۔ ٹرانسپورٹیشن سہولیات بھی selten معذور افراد کے لیے سازگار ہیں۔</span></p>
+    <p>Pakistan has signed the UN Convention on the Rights of Persons with Disabilities and enacted laws like the Punjab Empowerment of Persons with Disabilities Act 2022. However, implementation remains weak, and social stigma continues to marginalize persons with disabilities and their families. <span class="ur-text">پاکستان نے اقوام متحدہ کے معذور افراد کے حقوق کے کنوینشن پر دستخط کیے ہیں اور پنجاب معذور افراد کو بااختیار بنانے والا ایکٹ 2022 جیسے قوانین بنائے ہیں۔ لیکن عملدرآمد کمزور ہے، اور سماجی بدنامی معذور افراد کو حاشیے پر دھرتی رہی ہے۔</span></p>
+  </div>
+
+  <!-- SECTION 2 -->
+  <div class="article-section">
+    <h2><span class="section-num">2</span> NOWPDP: Our Mission & Work</h2>
+    <p>NOWPDP (Network of Organizations Working for People with Disabilities, Pakistan) was established in 2008 as a pioneering initiative dedicated to advancing disability inclusion across Pakistan. Our vision is simple yet powerful: to ensure that persons with disabilities have equal access to opportunities and are an integral part of society. <span class="ur-text">NOWPDP (پاکستان میں معذور افراد کے ساتھ کام کرنے والی تنظیموں کا نیٹ ورک) 2008 میں قائم کیا گیا تھا۔ ہمارا مشن یہ ہے کہ معذور افراد کو مساوی مواقع حاصل ہوں اور وہ معاشرے کا اہم حصہ ہوں۔</span></p>
+    <p>Through holistic and sustainable endeavors in advocacy, education, employment, and community engagement, NOWPDP creates inclusive ecosystems across Pakistan. Our flagship project, <strong>Moriro Markaz</strong> (Center of Excellence for Disability Inclusion), provides comprehensive solutions for the independence and empowerment of persons with disabilities. <span class="ur-text">ہمارے اہم منصوبے، <strong>موریرو مارکاز</strong> (معذوری کی شمولیت کا مرکز)، معذور افراد کی خود مختاری اور بااختیاری کے لیے جامع حل فراہم کرتا ہے۔</span></p>
+    <p>Our flagship campaign, <strong>100Days100Lives</strong>, aims to create 100 job opportunities for people with disabilities in Karachi each year. We also work on identity documentation, welfare programs, skills training, and advocacy for better policies and public awareness. <span class="ur-text">ہماری مہم <strong>100Days100Lives</strong> کا مقصد ہر سال کراچی میں معذور افراد کے لیے 100 ملازمتیں پیدا کرنا ہے۔ ہم شناختی دستاویزات، بہبودی پروگراموں، مہارتوں کی تربیت اور بہتر پالیسیوں کے لیے وکالت پر بھی کام کرتے ہیں۔</span></p>
+  </div>
+
+  <!-- SECTION 3 -->
+  <div class="article-section">
+    <h2><span class="section-num">3</span> How You Can Help</h2>
+    <p><strong>Start with awareness.</strong> The most powerful tool for change is knowledge. By completing this survey, you've already taken the first step. Share what you've learned with family, friends, and colleagues. Challenge misconceptions about disability when you encounter them. <span class="ur-text"><strong>آگاہی سے شروع کریں۔</strong> تبدیلی کے لیے سب سے طاقتور ہتھیار علم ہے۔ اس سروے کو مکمل کرکے، آپ پہلا قدم اٹھا چکے ہیں۔ اپنے ساتھیوں کے ساتھ جو کچھ آپ نے سیکھا ہے اسے بانٹیں۔</span></p>
+    <p><strong>Advocate for inclusion.</strong> Whether you're a student, teacher, employer, or community member, you can champion accessibility. Ask businesses about wheelchair access. Encourage schools to welcome students with disabilities. Support policies that promote equal opportunity. <span class="ur-text"><strong>شمولیت کی وکالت کریں۔</strong> چاہے آپ طالب علم، استاد، آجر یا برادری کا رکن ہوں، آپ رسائی کی حمایت کر سکتے ہیں۔ کاروباری اداروں سے وہیلچیئر کی رسائی کے بارے میں پوچھیں۔</span></p>
+    <p><strong>Get involved.</strong> Visit <a href="https://www.nowpdp.org" target="_blank">nowpdp.org</a> to explore volunteer opportunities, donate to support our programs, or connect with local disability organizations in your area. Every action, no matter how small, contributes to a more inclusive Pakistan. <span class="ur-text"><strong>شامل ہوں۔</strong> <a href="https://www.nowpdp.org" target="_blank">nowpdp.org</a> پر جائیں تاکہ رضاکار کے مواقع دریافت کریں، ہمارے پروگراموں کی حمایت کے لیے تعاون کریں، یا اپنے علاقے میں مقامی تنظیموں سے رابطہ کریں۔</span></p>
+  </div>
+
+  <!-- STATS -->
+  <div class="stats-row">
+    <div class="stat-box">
+      <strong>9.64%</strong>
+      <span>Pakistan's disabled population</span>
+    </div>
+    <div class="stat-box orange">
+      <strong>2008</strong>
+      <span>NOWPDP founded</span>
+    </div>
+    <div class="stat-box">
+      <strong>100+</strong>
+      <span>Jobs created annually</span>
+    </div>
+  </div>
+
+  <!-- CTA -->
+  <div class="cta-section">
+    <h3>Join the Movement</h3>
+    <p>Together, we can build a more inclusive Pakistan where every person thrives.</p>
+    <div class="cta-links">
+      <a href="https://www.nowpdp.org" target="_blank" class="cta-btn primary">Visit NOWPDP Website →</a>
+      <a href="index.html" class="cta-btn secondary">Take Survey Again</a>
+    </div>
+  </div>
+
+</div>
+
+<footer class="site-footer">
+  © 2025 <a href="https://www.nowpdp.org" target="_blank">NOWPDP</a> — Network of Organizations Working with People with Disabilities in Pakistan
+</footer>
+
+<script>
+let currentLang = 'en';
+
+function setLang(lang) {
+  currentLang = lang;
+  document.querySelectorAll('.lang-btn').forEach((b, i) => {
+    b.classList.toggle('active', (i === 0 && lang === 'en') || (i === 1 && lang === 'ur'));
+  });
+  const isUr = lang === 'ur';
+  document.querySelectorAll('.ur-text').forEach(el => {
+    el.style.display = isUr ? 'block' : 'none';
+  });
+}
+
+window.addEventListener('DOMContentLoaded', () => {
+  document.querySelectorAll('.ur-text').forEach(el => el.style.display = 'none');
+});
+</script>
+</body>
+</html>

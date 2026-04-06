@@ -1,0 +1,672 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Analytics Dashboard — NOWPDP Survey</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;800&family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+  var _supabaseUrl = 'YOUR_SUPABASE_URL';
+  var _supabaseKey = 'YOUR_SUPABASE_ANON_KEY';
+  var _sbClient = null;
+  function initSupabase() {
+    if (window.supabase && _supabaseUrl !== 'YOUR_SUPABASE_URL') {
+      _sbClient = window.supabase.createClient(_supabaseUrl, _supabaseKey);
+    }
+  }
+  document.addEventListener('DOMContentLoaded', initSupabase);
+</script>
+<style>
+:root {
+  --blue: #1a56db; --blue-dark: #1045b8; --blue-light: #eff4ff; --blue-mid: #3b82f6;
+  --orange: #f97316; --orange-light: #fff7ed;
+  --ink: #0f172a; --ink-mid: #334155;
+  --soft: #64748b; --border: #e2e8f0;
+  --bg: #f1f5f9; --white: #ffffff;
+  --shadow: 0 4px 20px rgba(15,23,42,.08);
+  --shadow-lg: 0 10px 40px rgba(15,23,42,.13);
+  --r: 16px;
+}
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--ink); display: flex; min-height: 100vh; }
+
+/* SIDEBAR */
+.sidebar {
+  width: 255px; flex-shrink: 0;
+  background: var(--ink);
+  display: flex; flex-direction: column;
+  padding: 28px 16px;
+  position: fixed; top: 0; left: 0; bottom: 0;
+  z-index: 200; overflow-y: auto;
+}
+.sb-logo { display: flex; align-items: center; gap: 12px; padding: 0 8px; margin-bottom: 36px; }
+.sb-mark {
+  width: 38px; height: 38px;
+  background: linear-gradient(135deg, var(--blue), var(--blue-mid));
+  border-radius: 11px; display: flex; align-items: center; justify-content: center;
+}
+.sb-mark svg { width: 20px; }
+.sb-brand strong { font-family: 'Playfair Display', serif; font-size: 15px; font-weight: 700; color: white; display: block; }
+.sb-brand span { font-size: 10px; color: rgba(255,255,255,.35); text-transform: uppercase; letter-spacing: .09em; }
+.sb-section { font-size: 10px; font-weight: 700; color: rgba(255,255,255,.28); text-transform: uppercase; letter-spacing: .1em; padding: 0 12px; margin: 20px 0 8px; }
+.sb-nav { display: flex; flex-direction: column; gap: 3px; }
+.sb-link {
+  display: flex; align-items: center; gap: 10px;
+  padding: 11px 12px; border-radius: 11px;
+  color: rgba(255,255,255,.5); font-size: 13.5px; font-weight: 500;
+  text-decoration: none; transition: .2s; cursor: pointer; border: none;
+  background: transparent; font-family: 'DM Sans', sans-serif; width: 100%;
+}
+.sb-link:hover, .sb-link.active { background: rgba(255,255,255,.09); color: white; }
+.sb-link svg { width: 16px; height: 16px; flex-shrink: 0; }
+.sb-divider { height: 1px; background: rgba(255,255,255,.08); margin: 16px 0; }
+.sb-bottom { margin-top: auto; display: flex; flex-direction: column; gap: 3px; }
+.sb-badge {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 20px; height: 20px; border-radius: 6px;
+  background: var(--orange); color: white;
+  font-size: 10px; font-weight: 700; margin-left: auto;
+}
+
+/* MAIN */
+.main { margin-left: 255px; flex: 1; min-height: 100vh; display: flex; flex-direction: column; }
+.topbar {
+  background: var(--white); border-bottom: 1px solid var(--border);
+  padding: 0 40px; height: 68px;
+  display: flex; align-items: center; justify-content: space-between;
+  position: sticky; top: 0; z-index: 100;
+}
+.topbar-left h1 { font-family: 'Playfair Display', serif; font-size: 1.4rem; font-weight: 700; color: var(--ink); }
+.topbar-left p { font-size: 12px; color: var(--soft); font-weight: 400; }
+.topbar-right { display: flex; align-items: center; gap: 12px; }
+.btn-sm {
+  display: flex; align-items: center; gap: 7px;
+  padding: 9px 20px; border-radius: 100px;
+  font-size: 13px; font-weight: 600; font-family: 'DM Sans', sans-serif;
+  cursor: pointer; transition: .2s;
+}
+.btn-outline { background: var(--white); border: 2px solid var(--border); color: var(--ink-mid); }
+.btn-outline:hover { border-color: var(--blue); color: var(--blue); }
+.btn-fill { background: var(--blue); border: none; color: white; box-shadow: 0 4px 14px rgba(26,86,219,.3); }
+.btn-fill:hover { background: var(--blue-dark); }
+
+/* VIEWS */
+.view { display: none; }
+.view.active { display: block; }
+.content { padding: 36px 40px 60px; flex: 1; }
+
+/* FILTERS */
+.filters-bar { display: flex; align-items: center; gap: 14px; margin-bottom: 28px; flex-wrap: wrap; }
+.filter-group { display: flex; align-items: center; gap: 8px; }
+.filter-group label { font-size: 12px; font-weight: 700; color: var(--soft); text-transform: uppercase; letter-spacing: .07em; }
+.filter-sel {
+  padding: 8px 32px 8px 14px;
+  border: 2px solid var(--border); border-radius: 100px;
+  font-size: 13px; font-family: 'DM Sans', sans-serif;
+  color: var(--ink-mid); background: var(--white);
+  outline: none; cursor: pointer; transition: .2s; appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%2364748b' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+  background-repeat: no-repeat; background-position: right 10px center;
+}
+.filter-sel:focus { border-color: var(--blue); }
+.filter-tag { font-size: 12px; font-weight: 500; color: var(--soft); background: var(--white); border: 1px solid var(--border); padding: 6px 14px; border-radius: 100px; }
+.filter-tag strong { color: var(--blue); }
+
+/* KPI */
+.kpi-row { display: grid; grid-template-columns: repeat(4,1fr); gap: 18px; margin-bottom: 24px; }
+.kpi { background: var(--white); border: 1.5px solid var(--border); border-radius: var(--r); padding: 22px 24px; box-shadow: var(--shadow); }
+.kpi-label { font-size: 12px; font-weight: 700; color: var(--soft); text-transform: uppercase; letter-spacing: .07em; margin-bottom: 10px; }
+.kpi-val { font-family: 'Playfair Display', serif; font-size: 2.3rem; font-weight: 700; color: var(--ink); line-height: 1; }
+.kpi-sub { font-size: 12px; color: var(--soft); margin-top: 6px; }
+.kpi-pill { display: inline-block; margin-top: 8px; padding: 3px 11px; border-radius: 100px; font-size: 12px; font-weight: 700; }
+.p-blue   { background: var(--blue-light); color: var(--blue); }
+.p-orange { background: var(--orange-light); color: var(--orange); }
+.p-green  { background: #f0fdf4; color: #16a34a; }
+.p-purple { background: #f5f3ff; color: #7c3aed; }
+
+/* CHARTS */
+.chart-row { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 22px; }
+.chart-card { background: var(--white); border: 1.5px solid var(--border); border-radius: var(--r); padding: 26px 28px; box-shadow: var(--shadow); }
+.chart-card.wide { grid-column: 1/-1; }
+.cc-head { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 20px; }
+.cc-title { font-size: 14px; font-weight: 700; color: var(--ink); }
+.cc-sub { font-size: 12px; color: var(--soft); margin-top: 3px; }
+canvas { max-height: 270px; }
+
+/* Q BREAKDOWN */
+.q-breakdown { background: var(--white); border: 1.5px solid var(--border); border-radius: var(--r); box-shadow: var(--shadow); margin-bottom: 24px; overflow: hidden; }
+.qb-header { padding: 22px 28px; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; }
+.qb-header h2 { font-size: 15px; font-weight: 700; }
+.qb-header span { font-size: 13px; color: var(--soft); }
+.qb-body { padding: 0 28px; }
+.qb-row { padding: 18px 0; border-bottom: 1px solid var(--border); }
+.qb-row:last-child { border-bottom: none; }
+.qb-q { font-size: 13px; font-weight: 600; color: var(--ink-mid); margin-bottom: 12px; display: flex; align-items: center; justify-content: space-between; }
+.qb-q span { font-size: 12px; font-weight: 400; color: var(--soft); }
+.bar-list { display: flex; flex-direction: column; gap: 8px; }
+.bar-item { display: grid; grid-template-columns: 200px 1fr 46px; align-items: center; gap: 12px; }
+.bar-lbl { font-size: 12px; color: var(--soft); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.bar-track { height: 8px; background: #f1f5f9; border-radius: 100px; overflow: hidden; }
+.bar-fill { height: 100%; border-radius: 100px; transition: width .6s ease; }
+.bar-pct { font-size: 12px; font-weight: 700; color: var(--ink-mid); text-align: right; }
+.knowledge-section-tag {
+  display: inline-flex; align-items: center; gap: 6px;
+  background: var(--orange-light); color: var(--orange);
+  border: 1px solid rgba(249,115,22,.25);
+  border-radius: 100px; padding: 3px 10px;
+  font-size: 10px; font-weight: 700;
+  text-transform: uppercase; letter-spacing: .05em;
+  margin-right: 8px;
+}
+
+/* TABLE */
+.table-wrap { background: var(--white); border: 1.5px solid var(--border); border-radius: var(--r); box-shadow: var(--shadow); overflow: hidden; margin-bottom: 24px; }
+.tw-header { padding: 22px 28px; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; }
+.tw-header h2 { font-size: 15px; font-weight: 700; }
+.tw-header span { font-size: 13px; color: var(--soft); }
+table { width: 100%; border-collapse: collapse; }
+th { padding: 12px 16px; text-align: left; font-size: 11px; font-weight: 700; color: var(--soft); text-transform: uppercase; letter-spacing: .07em; border-bottom: 1px solid var(--border); background: #f8fafc; }
+td { padding: 13px 16px; font-size: 13px; border-bottom: 1px solid var(--border); vertical-align: middle; }
+tr:last-child td { border-bottom: none; }
+tr:hover td { background: #f8fafc; }
+.badge { display: inline-block; padding: 3px 10px; border-radius: 100px; font-size: 11px; font-weight: 700; }
+.bm { background: var(--blue-light); color: var(--blue); }
+.bf { background: #fdf2f8; color: #9d174d; }
+.bn { background: #f1f5f9; color: var(--soft); }
+.q-preview { max-width: 160px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-size: 12px; color: var(--soft); }
+
+/* EMPTY STATE */
+.empty-state { text-align: center; padding: 60px 20px; }
+.empty-state h3 { font-size: 18px; font-weight: 700; color: var(--ink); margin-bottom: 8px; }
+.empty-state p { font-size: 14px; color: var(--soft); }
+.empty-icon { font-size: 40px; margin-bottom: 16px; }
+
+/* LOADING */
+.loading-bar {
+  position: fixed; top: 0; left: 0; right: 0; height: 3px; z-index: 9999;
+  background: linear-gradient(90deg, var(--blue), var(--orange));
+  animation: loadpulse 1.2s ease-in-out infinite;
+  display: none;
+}
+@keyframes loadpulse { 0%,100% { opacity:1; } 50% { opacity:.4; } }
+.loading-bar.show { display: block; }
+</style>
+</head>
+<body>
+<div class="loading-bar" id="loading-bar"></div>
+
+<!-- SIDEBAR -->
+<nav class="sidebar">
+  <div class="sb-logo">
+    <div class="sb-mark">
+      <svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="7" r="3" fill="white" opacity=".9"/><path d="M5 20c0-4 3-7 7-7s7 3 7 7" stroke="white" stroke-width="2" stroke-linecap="round"/></svg>
+    </div>
+    <div class="sb-brand">
+      <strong>NOWPDP</strong>
+      <span>Survey Dashboard</span>
+    </div>
+  </div>
+
+  <div class="sb-section">Analytics</div>
+  <div class="sb-nav">
+    <button class="sb-link active" onclick="showView('overview')" id="nav-overview">
+      <svg viewBox="0 0 16 16" fill="none"><rect x="1" y="1" width="6" height="6" rx="1.5" fill="currentColor" opacity=".6"/><rect x="9" y="1" width="6" height="6" rx="1.5" fill="currentColor" opacity=".6"/><rect x="1" y="9" width="6" height="6" rx="1.5" fill="currentColor" opacity=".6"/><rect x="9" y="9" width="6" height="6" rx="1.5" fill="currentColor" opacity=".6"/></svg>
+      Overview
+    </button>
+    <button class="sb-link" onclick="showView('questions')" id="nav-questions">
+      <svg viewBox="0 0 16 16" fill="none"><path d="M2 4h12M2 8h8M2 12h10" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+      Question Breakdown
+    </button>
+    <button class="sb-link" onclick="showView('responses')" id="nav-responses">
+      <svg viewBox="0 0 16 16" fill="none"><rect x="1" y="2" width="14" height="12" rx="2" stroke="currentColor" stroke-width="1.5"/><path d="M5 7h6M5 10h4" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>
+      All Responses
+      <span class="sb-badge" id="sb-count">0</span>
+    </button>
+  </div>
+
+  <div class="sb-divider"></div>
+  <div class="sb-section">Filters</div>
+  <div class="sb-nav">
+    <button class="sb-link" onclick="showView('overview')">
+      <svg viewBox="0 0 16 16" fill="none"><path d="M8 2v4M8 10v4M2 8h4M10 8h4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+      Demographics
+    </button>
+  </div>
+
+  <div class="sb-bottom">
+    <div class="sb-divider"></div>
+    <button class="sb-link" onclick="loadAll()">
+      <svg viewBox="0 0 16 16" fill="none"><path d="M13 8A5 5 0 1 1 8 3" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><path d="M13 3v5h-5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      Refresh Data
+    </button>
+    <button class="sb-link" onclick="exportCSV()">
+      <svg viewBox="0 0 16 16" fill="none"><path d="M8 2v8M5 7l3 3 3-3" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M3 12h10" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+      Export CSV
+    </button>
+    <button class="sb-link" onclick="logout()">
+      <svg viewBox="0 0 16 16" fill="none"><path d="M6 2H3a1 1 0 0 0-1 1v10a1 1 0 0 0 1 1h3M11 11l3-3-3-3M14 8H6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      Logout
+    </button>
+  </div>
+</nav>
+
+<!-- MAIN -->
+<div class="main">
+  <div class="topbar">
+    <div class="topbar-left">
+      <h1>Disability Awareness Survey</h1>
+      <p id="topbar-sub">Loading data…</p>
+    </div>
+    <div class="topbar-right">
+      <button class="btn-sm btn-outline" onclick="loadAll()">↻ Refresh</button>
+      <button class="btn-sm btn-fill" onclick="exportCSV()">↓ Export CSV</button>
+    </div>
+  </div>
+
+  <div class="content">
+
+    <!-- FILTERS BAR -->
+    <div class="filters-bar">
+      <div class="filter-group">
+        <label>Age</label>
+        <select class="filter-sel" id="f-age" onchange="applyFilters()">
+          <option value="">All Ages</option>
+          <option value="Under 18">Under 18</option>
+          <option value="18–24">18–24</option>
+          <option value="25–34">25–34</option>
+          <option value="35–44">35–44</option>
+          <option value="45+">45+</option>
+        </select>
+      </div>
+      <div class="filter-group">
+        <label>Gender</label>
+        <select class="filter-sel" id="f-gender" onchange="applyFilters()">
+          <option value="">All Genders</option>
+          <option value="Male">Male</option>
+          <option value="Female">Female</option>
+          <option value="Non-binary">Non-binary</option>
+          <option value="Prefer not to say">Prefer not to say</option>
+        </select>
+      </div>
+      <div class="filter-group">
+        <label>Education</label>
+        <select class="filter-sel" id="f-edu" onchange="applyFilters()">
+          <option value="">All Education</option>
+          <option value="Below Matric">Below Matric</option>
+          <option value="Matric / O-Level">Matric / O-Level</option>
+          <option value="Intermediate / A-Level">Intermediate / A-Level</option>
+          <option value="Bachelor's">Bachelor's</option>
+          <option value="Master's or above">Master's or above</option>
+        </select>
+      </div>
+      <div class="filter-tag">Showing: <strong id="filter-count">all</strong> responses</div>
+    </div>
+
+    <!-- OVERVIEW VIEW -->
+    <div class="view active" id="view-overview">
+      <div class="kpi-row">
+        <div class="kpi">
+          <div class="kpi-label">Total Responses</div>
+          <div class="kpi-val" id="kpi-total">—</div>
+          <div class="kpi-pill p-blue" id="kpi-today">Loading…</div>
+        </div>
+        <div class="kpi">
+          <div class="kpi-label">Rights Awareness</div>
+          <div class="kpi-val" id="kpi-aware">—</div>
+          <div class="kpi-sub">Aware of disability laws</div>
+        </div>
+        <div class="kpi">
+          <div class="kpi-label">Feel Society Includes PWD</div>
+          <div class="kpi-val" id="kpi-include">—</div>
+          <div class="kpi-sub">Say "very well" or "partially"</div>
+        </div>
+        <div class="kpi">
+          <div class="kpi-label">Survey Impact</div>
+          <div class="kpi-val" id="kpi-impact">—</div>
+          <div class="kpi-sub">More aware after survey</div>
+        </div>
+      </div>
+
+      <div class="chart-row">
+        <div class="chart-card">
+          <div class="cc-head">
+            <div><div class="cc-title">Age Distribution</div><div class="cc-sub">Respondents by age group</div></div>
+          </div>
+          <canvas id="c-age"></canvas>
+        </div>
+        <div class="chart-card">
+          <div class="cc-head">
+            <div><div class="cc-title">Gender Breakdown</div><div class="cc-sub">Respondents by gender</div></div>
+          </div>
+          <canvas id="c-gender"></canvas>
+        </div>
+      </div>
+
+      <div class="chart-row">
+        <div class="chart-card">
+          <div class="cc-head">
+            <div><div class="cc-title">Education Level</div><div class="cc-sub">Respondents by education</div></div>
+          </div>
+          <canvas id="c-edu"></canvas>
+        </div>
+        <div class="chart-card">
+          <div class="cc-head">
+            <div><div class="cc-title">Rights Knowledge Score</div><div class="cc-sub">% aware of key disability rights (Q8–Q10)</div></div>
+          </div>
+          <canvas id="c-knowledge"></canvas>
+        </div>
+      </div>
+
+      <div class="chart-row">
+        <div class="chart-card wide">
+          <div class="cc-head">
+            <div><div class="cc-title">Submission Timeline</div><div class="cc-sub">Daily response volume</div></div>
+          </div>
+          <canvas id="c-time" style="max-height:200px;"></canvas>
+        </div>
+      </div>
+    </div>
+
+    <!-- QUESTIONS VIEW -->
+    <div class="view" id="view-questions">
+      <div class="q-breakdown">
+        <div class="qb-header">
+          <h2>Question-by-Question Breakdown</h2>
+          <span id="qb-total">—</span>
+        </div>
+        <div class="qb-body" id="qb-body">
+          <div class="empty-state"><div class="empty-icon">📊</div><h3>Loading responses…</h3></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- RESPONSES VIEW -->
+    <div class="view" id="view-responses">
+      <div class="table-wrap">
+        <div class="tw-header">
+          <h2>All Responses</h2>
+          <span id="resp-count">—</span>
+        </div>
+        <div style="overflow-x:auto;">
+          <table>
+            <thead>
+              <tr>
+                <th>#</th>
+                <th>Age</th>
+                <th>Gender</th>
+                <th>Education</th>
+                <th>Know Someone (Q1)</th>
+                <th>Society Inclusion (Q3)</th>
+                <th>Aware of Law (Q8)</th>
+                <th>Constitution (Q9)</th>
+                <th>Job Quota (Q10)</th>
+                <th>Date</th>
+              </tr>
+            </thead>
+            <tbody id="resp-tbody">
+              <tr><td colspan="10"><div class="empty-state"><div class="empty-icon">📋</div><h3>Loading…</h3></div></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /content -->
+</div><!-- /main -->
+
+<script>
+// Auth guard
+if (!sessionStorage.getItem('admin-ok')) window.location.href = 'admin.html';
+
+let allData = [], filteredData = [];
+const charts = {};
+const BLUE = '#1a56db', ORANGE = '#f97316';
+const PALETTE = [BLUE,'#3b82f6','#60a5fa',ORANGE,'#fb923c','#fbbf24','#34d399','#a78bfa'];
+const BAR_COLORS = [BLUE, ORANGE, '#34d399', '#a78bfa'];
+
+function showView(name) {
+  document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+  document.querySelectorAll('.sb-link').forEach(l => l.classList.remove('active'));
+  document.getElementById('view-' + name).classList.add('active');
+  document.getElementById('nav-' + name)?.classList.add('active');
+}
+
+async function loadAll() {
+  document.getElementById('loading-bar').classList.add('show');
+  try {
+    if (!_sbClient) {
+      renderDemoData();
+      return;
+    }
+    const { data, error } = await _sbClient.from('responses').select('*').order('submitted_at', { ascending: false });
+    if (error) throw error;
+    allData = data || [];
+    filteredData = [...allData];
+    renderAll(filteredData);
+    document.getElementById('topbar-sub').textContent = `Last updated: ${new Date().toLocaleTimeString()}`;
+    document.getElementById('sb-count').textContent = allData.length;
+  } catch(e) {
+    console.error(e);
+    document.getElementById('topbar-sub').textContent = 'Error loading data — check Supabase config';
+    renderDemoData();
+  } finally {
+    document.getElementById('loading-bar').classList.remove('show');
+  }
+}
+
+function renderDemoData() {
+  document.getElementById('topbar-sub').textContent = 'Demo mode — configure Supabase to see real data';
+  allData = []; filteredData = [];
+  renderAll([]);
+  document.getElementById('sb-count').textContent = '0';
+}
+
+function applyFilters() {
+  const age = document.getElementById('f-age').value;
+  const gender = document.getElementById('f-gender').value;
+  const edu = document.getElementById('f-edu').value;
+  filteredData = allData.filter(r =>
+    (!age || r.age === age) &&
+    (!gender || r.gender === gender) &&
+    (!edu || r.education === edu)
+  );
+  document.getElementById('filter-count').textContent = filteredData.length || 'all';
+  renderAll(filteredData);
+}
+
+function cnt(rows, key, val) { return rows.filter(r => r[key] === val).length; }
+function pct(c, total) { return total ? Math.round((c/total)*100) : 0; }
+
+function renderAll(rows) {
+  const total = rows.length;
+  document.getElementById('kpi-total').textContent = total;
+  document.getElementById('filter-count').textContent = total || 'all';
+
+  // Today count
+  const today = new Date().toISOString().slice(0,10);
+  const todayCount = rows.filter(r => (r.submitted_at||'').slice(0,10) === today).length;
+  document.getElementById('kpi-today').textContent = todayCount + ' today';
+
+  // Rights Awareness KPI (Q8 = Yes, fully aware)
+  const awareCount = cnt(rows, 'q8', 'Yes, I am fully aware');
+  document.getElementById('kpi-aware').textContent = pct(awareCount, total) + '%';
+
+  // Inclusion KPI (Q3 = Very well or Partially)
+  const includeCount = rows.filter(r => r.q3 === 'Very well included' || r.q3 === 'Partially included').length;
+  document.getElementById('kpi-include').textContent = pct(includeCount, total) + '%';
+
+  // Survey Impact KPI (Q12 = Yes significantly or Somewhat)
+  const impactCount = rows.filter(r => r.q12 === 'Yes, significantly more aware' || r.q12 === 'Somewhat more aware').length;
+  document.getElementById('kpi-impact').textContent = pct(impactCount, total) + '%';
+
+  renderDoughnut('c-age', rows, 'age');
+  renderDoughnut('c-gender', rows, 'gender');
+  renderDoughnut('c-edu', rows, 'education');
+  renderKnowledgeBar(rows, total);
+  renderTimeline(rows);
+  renderQBreakdown(rows, total);
+  renderTable(rows);
+}
+
+function destroyChart(id) { if (charts[id]) { charts[id].destroy(); delete charts[id]; } }
+
+function renderDoughnut(id, rows, key) {
+  destroyChart(id);
+  const counts = {};
+  rows.forEach(r => { const v = r[key]||'Unknown'; counts[v] = (counts[v]||0) + 1; });
+  const labels = Object.keys(counts);
+  const data = labels.map(l => counts[l]);
+  const ctx = document.getElementById(id).getContext('2d');
+  charts[id] = new Chart(ctx, {
+    type: 'doughnut',
+    data: { labels, datasets: [{ data, backgroundColor: PALETTE, borderWidth: 0 }] },
+    options: { cutout: '62%', plugins: { legend: { position: 'bottom', labels: { font: { size: 12, family: 'DM Sans' }, padding: 14 } } } }
+  });
+}
+
+function renderKnowledgeBar(rows, total) {
+  destroyChart('c-knowledge');
+  const labels = ['Aware of Law (Q8)', 'Constitution (Q9)', 'Job Quota (Q10)'];
+  const data = [
+    pct(cnt(rows, 'q8', 'Yes, I am fully aware'), total),
+    pct(cnt(rows, 'q9', 'Yes, I knew this'), total),
+    pct(cnt(rows, 'q10', 'Yes, fully aware'), total),
+  ];
+  const ctx = document.getElementById('c-knowledge').getContext('2d');
+  charts['c-knowledge'] = new Chart(ctx, {
+    type: 'bar',
+    data: { labels, datasets: [{ label: '% Fully Aware', data, backgroundColor: [BLUE, ORANGE, '#34d399'], borderRadius: 10, borderSkipped: false }] },
+    options: {
+      plugins: { legend: { display: false } },
+      scales: {
+        y: { max: 100, ticks: { callback: v => v + '%', font: { family: 'DM Sans' } }, grid: { color: '#f1f5f9' } },
+        x: { grid: { display: false }, ticks: { font: { family: 'DM Sans', size: 11 } } }
+      }
+    }
+  });
+}
+
+function renderTimeline(rows) {
+  destroyChart('c-time');
+  const byDate = {};
+  rows.forEach(r => { const d = (r.submitted_at||'').slice(0,10); if (d) byDate[d] = (byDate[d]||0)+1; });
+  const sorted = Object.keys(byDate).sort();
+  const ctx = document.getElementById('c-time').getContext('2d');
+  charts['c-time'] = new Chart(ctx, {
+    type: 'line',
+    data: {
+      labels: sorted.length ? sorted : ['No data'],
+      datasets: [{ label: 'Submissions', data: sorted.map(d => byDate[d]),
+        borderColor: BLUE, backgroundColor: 'rgba(26,86,219,.08)',
+        tension: .4, fill: true, pointBackgroundColor: BLUE, pointRadius: 4 }]
+    },
+    options: {
+      plugins: { legend: { display: false } },
+      scales: {
+        y: { beginAtZero: true, ticks: { stepSize: 1, font: { family: 'DM Sans' } }, grid: { color: '#f1f5f9' } },
+        x: { grid: { display: false }, ticks: { font: { family: 'DM Sans', size: 11 } } }
+      }
+    }
+  });
+}
+
+const Q_DEF = [
+  { key:'q1', label:'Q1 · Do you know or interact with someone who has a disability?', knowledge: false,
+    opts:['Yes, a family member','Yes, a friend or colleague','Yes, a community member','No, I don\'t personally know anyone'] },
+  { key:'q2', label:'Q2 · How comfortable are you interacting with a person with a disability?', knowledge: false,
+    opts:['Very comfortable','Somewhat comfortable','Uncomfortable at times','Not comfortable'] },
+  { key:'q3', label:'Q3 · How well does society include people with disabilities?', knowledge: false,
+    opts:['Very well included','Partially included','Mostly excluded','Completely excluded'] },
+  { key:'q4', label:'Q4 · How accessible are public spaces for people with disabilities?', knowledge: false,
+    opts:['Very accessible','Somewhat accessible','Mostly inaccessible','Completely inaccessible'] },
+  { key:'q5', label:'Q5 · Should students with disabilities be educated in mainstream schools?', knowledge: false,
+    opts:['Yes, fully included in mainstream schools','Yes, with additional support resources','It depends on the type of disability','No, separate specialized schools are better'] },
+  { key:'q6', label:'Q6 · Do employers in Pakistan give fair job opportunities to PWD?', knowledge: false,
+    opts:['Yes, in most cases','Sometimes, but not consistently','Rarely','No, there is significant discrimination'] },
+  { key:'q7', label:'Q7 · Have you spoken up to support a person with a disability being treated unfairly?', knowledge: false,
+    opts:['Yes, I have intervened directly','Yes, I reported it to someone','No, but I wish I had','I have never witnessed such a situation'] },
+  { key:'q8', label:'Q8 ⭐ Were you aware of Pakistan\'s national law protecting disability rights?', knowledge: true,
+    opts:['Yes, I am fully aware','I heard about it but don\'t know details','No, I was not aware','Not sure'] },
+  { key:'q9', label:'Q9 ⭐ Pakistan\'s Constitution guarantees equal rights for citizens with disabilities. Aware?', knowledge: true,
+    opts:['Yes, I knew this','I had a general idea','No, I did not know','Not sure'] },
+  { key:'q10', label:'Q10 ⭐ Was the Government\'s job quota for PWD known to you?', knowledge: true,
+    opts:['Yes, fully aware','I had some idea','No, I was not aware','Not sure'] },
+  { key:'q11', label:'Q11 ⭐ Did you know what NOWPDP does?', knowledge: true,
+    opts:['Yes, I know it well','I\'ve heard of it but not sure of its role','No, I\'m hearing about it for the first time'] },
+  { key:'q12', label:'Q12 · Would you like to learn more about disability awareness and NOWPDP?', knowledge: false,
+    opts:['Yes, click here to learn more','Maybe later','Not interested'] },
+];
+
+function renderQBreakdown(rows, total) {
+  document.getElementById('qb-total').textContent = total + ' responses';
+  if (!total) {
+    document.getElementById('qb-body').innerHTML = '<div class="empty-state"><div class="empty-icon">📊</div><h3>No responses yet</h3><p>Data will appear once survey responses are submitted.</p></div>';
+    return;
+  }
+  document.getElementById('qb-body').innerHTML = Q_DEF.map(q => {
+    const qTotal = rows.filter(r => r[q.key]).length;
+    const knowledgeBadge = q.knowledge ? '<span class="knowledge-section-tag">⭐ Knowledge</span>' : '';
+    const bars = q.opts.map((opt, i) => {
+      const c = cnt(rows, q.key, opt);
+      const p = pct(c, qTotal);
+      return `<div class="bar-item">
+        <div class="bar-lbl" title="${opt}">${opt}</div>
+        <div class="bar-track"><div class="bar-fill" style="width:${p}%;background:${BAR_COLORS[i%BAR_COLORS.length]}"></div></div>
+        <div class="bar-pct">${p}%</div>
+      </div>`;
+    }).join('');
+    return `<div class="qb-row">
+      <div class="qb-q">${knowledgeBadge}${q.label} <span>${qTotal} answered</span></div>
+      <div class="bar-list">${bars}</div>
+    </div>`;
+  }).join('');
+}
+
+function renderTable(rows) {
+  document.getElementById('resp-count').textContent = rows.length + ' records';
+  const tbody = document.getElementById('resp-tbody');
+  if (!rows.length) {
+    tbody.innerHTML = `<tr><td colspan="10"><div class="empty-state"><div class="empty-icon">📋</div><h3>No responses yet</h3><p>Survey responses will appear here once submitted.</p></div></td></tr>`;
+    return;
+  }
+  tbody.innerHTML = rows.slice(0,100).map((r,i) => {
+    const gClass = r.gender === 'Male' ? 'bm' : r.gender === 'Female' ? 'bf' : 'bn';
+    const date = r.submitted_at ? new Date(r.submitted_at).toLocaleDateString('en-GB') : '—';
+    return `<tr>
+      <td style="font-weight:700;color:#94a3b8;">${i+1}</td>
+      <td>${r.age||'—'}</td>
+      <td><span class="badge ${gClass}">${r.gender||'—'}</span></td>
+      <td style="font-size:12px;">${r.education||'—'}</td>
+      <td style="font-size:12px;color:#334155;">${(r.q1||'—').split(',')[0]}</td>
+      <td style="font-size:12px;color:#334155;">${(r.q3||'—').split(',')[0]}</td>
+      <td style="font-size:12px;color:#334155;">${(r.q8||'—').split(',')[0]}</td>
+      <td style="font-size:12px;color:#334155;">${(r.q9||'—').split(',')[0]}</td>
+      <td style="font-size:12px;color:#334155;">${(r.q10||'—').split(',')[0]}</td>
+      <td style="color:#94a3b8;font-size:12px;">${date}</td>
+    </tr>`;
+  }).join('');
+}
+
+function exportCSV() {
+  const rows = filteredData.length ? filteredData : allData;
+  if (!rows.length) { alert('No data to export yet.'); return; }
+  const keys = ['age','gender','education','q1','q2','q3','q4','q5','q6','q7','q8','q9','q10','q11','q12','submitted_at'];
+  const header = keys.join(',');
+  const lines = rows.map(r => keys.map(k => '"' + String(r[k]||'').replace(/"/g,'""') + '"').join(','));
+  const csv = [header,...lines].join('\n');
+  const blob = new Blob([csv], { type: 'text/csv' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a'); a.href=url; a.download='nowpdp_survey_responses.csv'; a.click();
+  URL.revokeObjectURL(url);
+}
+
+function logout() { sessionStorage.removeItem('admin-ok'); window.location.href = 'admin.html'; }
+
+loadAll();
+setInterval(loadAll, 30000);
+</script>
+</body>
+</html>
